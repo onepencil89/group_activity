@@ -137,6 +137,7 @@ if st.session_state.chat_open:
         if len(st.session_state.messages) > 0:
             if st.button("🗑️ 대화 초기화", key="clear_chat"):
                 st.session_state.messages = []
+                st.rerun()
 # # ==================== 메인 페이지 ====================
 # st.title("🏃‍♂️ 러너스클럽에 오신 것을 환영합니다!")
 
@@ -161,4 +162,3 @@ if st.session_state.chat_open:
 # st.write("- 2025-10-26: 15km 러닝")
 
 # ==================== 플로팅 챗봇 ====================
-                st.rerun()
