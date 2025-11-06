@@ -1,0 +1,10 @@
+streamlit
+streamlit-folium
+folium
+torch
+transformers
+pillow
+gpxpy
+scikit-learn
+python-dotenv
+openai

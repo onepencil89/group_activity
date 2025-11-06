@@ -193,19 +193,27 @@ if mode == "📸 작가 모드":
         st.info(f"선택된 위치: {latlon}")
 
     uploaded = st.file_uploader("사진 업로드", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
+
     if uploaded and latlon:
+        existing_names = {p["name"] for p in st.session_state["photos"] if p["tournament"] == tournament}
+        new_photos = []
+
         for f in uploaded:
+            if f.name in existing_names:
+                continue  # ✅ 중복 방지
+
             img = Image.open(f).convert("RGB")
             exif = extract_exif_data(img)
             photo_time = safe_parse_time(exif)
             emb = get_image_embedding(img, model, processor, device)
+
             thumb = img.copy()
             thumb.thumbnail((150, 150))
             buf = io.BytesIO()
             thumb.save(buf, format="JPEG")
             thumb_b64 = base64.b64encode(buf.getvalue()).decode()
 
-            st.session_state["photos"].append({
+            new_photos.append({
                 "id": uuid.uuid4().hex,
                 "name": f.name,
                 "lat": latlon[0],
@@ -216,7 +224,12 @@ if mode == "📸 작가 모드":
                 "thumb": thumb_b64,
                 "bytes": f.getvalue(),
             })
-        st.success(f"{len(uploaded)}장 업로드 완료")
+
+        if new_photos:
+            st.session_state["photos"].extend(new_photos)
+            st.success(f"{len(new_photos)}장 업로드 완료 (총 {len(st.session_state['photos'])}장 저장됨)")
+        else:
+            st.info("이미 저장된 파일이므로 건너뜁니다.")
 
 # ==================================================
 # 🔍 이용자 모드
@@ -250,9 +263,6 @@ else:
         else:
             st.info("먼저 참가한 대회를 선택해주세요.")
 
-    # ----------------------------------------------------
-    # 검색 결과 페이지
-    # ----------------------------------------------------
     else:
         tournament_name = st.session_state["selected_tournament"]
         coords = load_gpx_coords(tournaments[tournament_name])
@@ -274,7 +284,7 @@ else:
 
         st.markdown("---")
 
-        # 1️⃣ 지도 영역
+        # 지도 + 결과 표시
         map_col, list_col = st.columns([5, 5])
         with map_col:
             st.markdown("### 🗺️ 마라톤 코스 및 사진 위치")
@@ -297,7 +307,7 @@ else:
                 m = create_course_map_with_photos(coords, photo_markers)
                 st_folium(m, width=900, height=500)
 
-        # 2️⃣ 오른쪽: 목록 or 상세보기
+        # 상세보기 or 목록
         with list_col:
             if st.session_state["show_detail_view"]:
                 sel_id = st.session_state["selected_photo_id"]
