@@ -1,7 +1,7 @@
 # 프로젝트 구조
 high-runners/
 │
-├── function_final.py      ← 메인 앱
+├── function_final_v2.py      ← 메인 앱
 ├── data/
 │   ├── 2025_JTBC.gpx
 │   └── chuncheon_marathon.gpx
@@ -54,5 +54,5 @@ import os
 git clone 
 cd project1
 pip install -r rquirements.txt
-streamlit run function_final.py
+streamlit run function_final_v2.py
 ```
